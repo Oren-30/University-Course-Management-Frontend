@@ -30,3 +30,21 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+        <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
+        <Route path="/instructors" element={<ProtectedRoute><Instructors /></ProtectedRoute>} />
+        <Route path="/enrollments" element={<ProtectedRoute><Enrollments /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
