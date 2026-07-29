@@ -1,85 +1,31 @@
-import React from "react";
+import { createContext, useContext, useState } from "react";
 
-function StudentCard({ student, onEdit, onDelete }) {
+const AuthContext = createContext();
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
+
+  const login = (userData, token) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
   return (
-    <div className="card shadow-sm mb-4 h-100">
-
-      <div className="card-body">
-
-        {/* Student Image */}
-        <div className="text-center mb-3">
-
-          <img
-            src="https://via.placeholder.com/120"
-            alt="Student"
-            className="rounded-circle"
-            width="120"
-            height="120"
-          />
-
-        </div>
-
-
-        {/* Student Name */}
-        <h4 className="card-title text-center text-primary">
-          {student.first_name} {student.last_name}
-        </h4>
-
-
-        <hr />
-
-
-        {/* Student Details */}
-        <p>
-          <strong>Email:</strong> {student.email}
-        </p>
-
-
-        <p>
-          <strong>Student ID:</strong> {student.student_number}
-        </p>
-
-
-        <p>
-          <strong>Department:</strong> {student.department}
-        </p>
-
-
-        <p>
-          <strong>Program:</strong> {student.program}
-        </p>
-
-
-        <p>
-          <strong>Year of Study:</strong> {student.year_of_study}
-        </p>
-
-
-        {/* Actions */}
-        <div className="d-flex justify-content-between mt-4">
-
-          <button
-            className="btn btn-warning"
-            onClick={() => onEdit(student)}
-          >
-            Edit
-          </button>
-
-
-          <button
-            className="btn btn-danger"
-            onClick={() => onDelete(student.id)}
-          >
-            Delete
-          </button>
-
-        </div>
-
-
-      </div>
-
-    </div>
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
-export default StudentCard;
+export function useAuth() {
+  return useContext(AuthContext);
+}

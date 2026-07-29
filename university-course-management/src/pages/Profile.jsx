@@ -2,9 +2,10 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
+
 function Profile() {
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user")) || {};
 
   return (
     <>
@@ -36,11 +37,11 @@ function Profile() {
                   />
 
                   <h3>
-                    {user?.first_name} {user?.last_name}
+                    {user.first_name} {user.last_name}
                   </h3>
 
                   <p className="text-muted">
-                    {user?.role}
+                    {user.role}
                   </p>
 
                 </div>
@@ -52,24 +53,26 @@ function Profile() {
                   <div className="col-md-6">
 
                     <h5>First Name</h5>
-                    <p>{user?.first_name}</p>
+                    <p>{user.first_name}</p>
 
                     <h5>Email</h5>
-                    <p>{user?.email}</p>
+                    <p>{user.email}</p>
 
                   </div>
+
 
                   <div className="col-md-6">
 
                     <h5>Last Name</h5>
-                    <p>{user?.last_name}</p>
+                    <p>{user.last_name}</p>
 
                     <h5>Role</h5>
-                    <p>{user?.role}</p>
+                    <p>{user.role}</p>
 
                   </div>
 
                 </div>
+
 
                 <div className="mt-4">
 
@@ -82,6 +85,7 @@ function Profile() {
                   </button>
 
                 </div>
+
 
               </div>
 
@@ -97,3 +101,4 @@ function Profile() {
   );
 }
 
+export default Profile;
