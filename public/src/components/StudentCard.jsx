@@ -43,3 +43,41 @@ function StudentCard({ student, onEdit, onDelete }) {
         <p>
           <strong>Department:</strong> {student.department}
         </p>
+        <p>
+          <strong>Program:</strong> {student.program}
+        </p>
+
+
+        <p>
+          <strong>Year of Study:</strong> {student.year_of_study}
+        </p>
+
+
+        {/* Actions */}
+        <div className="d-flex justify-content-between mt-4">
+
+          <button
+            className="btn btn-warning"
+            onClick={() => onEdit(student)}
+          >
+            Edit
+          </button>
+
+
+          <button
+            className="btn btn-danger"
+            onClick={() => onDelete(student.id)}
+          >
+            Delete
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </div>
+  );
+}
+
+export default StudentCard;
