@@ -1,131 +1,107 @@
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 
 function Navbar() {
-  const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const { user, logout } = useAuth();
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    navigate("/login");
-  };
-const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    navigate("/login");
-  };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
 
-      <div className="container">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
 
-        {/* Logo */}
-        <Link className="navbar-brand fw-bold" to="/">
-          University Course Management System
+      <div className="container-fluid">
+
+        <Link 
+          className="navbar-brand" 
+          to="/"
+        >
+          CMS University
         </Link>
 
 
-        {/* Mobile Button */}
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarMenu"
+          data-bs-target="#navbarNav"
         >
+
           <span className="navbar-toggler-icon"></span>
+
         </button>
 
 
-        {/* Navigation Links */}
-        <div
+        <div 
           className="collapse navbar-collapse"
-          id="navbarMenu"
+          id="navbarNav"
         >
 
           <ul className="navbar-nav ms-auto">
 
 
             <li className="nav-item">
-              <Link className="nav-link" to="/">
-                Home
+
+              <Link 
+                className="nav-link"
+                to="/dashboard"
+              >
+                Dashboard
               </Link>
+
             </li>
 
 
-            {user && (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">
-                    Dashboard
-                  </Link>
-                </li>
+            <li className="nav-item">
+
+              <Link 
+                className="nav-link"
+                to="/courses"
+              >
+                Courses
+              </Link>
+
+            </li>
 
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/students">
-                    Students
-                  </Link>
-                </li>
+            <li className="nav-item">
+
+              <Link 
+                className="nav-link"
+                to="/students"
+              >
+                Students
+              </Link>
+
+            </li>
 
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/courses">
-                    Courses
-                  </Link>
-                </li>
-
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/instructors">
-                    Instructors
-                  </Link>
-                </li>
-
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/enrollment">
-                    Enrollments
-                  </Link>
-                </li>
-
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/profile">
-                    Profile
-                  </Link>
-                </li>
-              </>
-            )}
-
-
-            {!user ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    Login
-                  </Link>
-                </li>
-
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/register">
-                    Register
-                  </Link>
-                </li>
-              </>
-            ) : (
+            {user ? (
 
               <li className="nav-item">
+
                 <button
-                  className="btn btn-light ms-2"
+                  className="btn btn-danger ms-2"
                   onClick={logout}
                 >
                   Logout
                 </button>
+
+              </li>
+
+            ) : (
+
+              <li className="nav-item">
+
+                <Link
+                  className="btn btn-light ms-2"
+                  to="/login"
+                >
+                  Login
+                </Link>
+
               </li>
 
             )}
@@ -138,7 +114,10 @@ const logout = () => {
       </div>
 
     </nav>
+
   );
 }
 
+
 export default Navbar;
+                
