@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
@@ -15,6 +15,15 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   // Handle input changes
   const handleChange = (e) => {
     setFormData({
@@ -23,7 +32,7 @@ function Login() {
     });
   };
 
-  // Handle login form submission
+  // Handle login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -31,26 +40,33 @@ function Login() {
     setError("");
 
     try {
-      const response = await api.post("/login", formData);
+      const response = await api.post("/auth/login", formData);
 
-      // Save JWT token
-      localStorage.setItem("token", response.data.access_token);
+      // Save JWT
+      localStorage.setItem(
+        "token",
+        response.data.access_token
+      );
 
-      // Save logged-in user (optional)
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      alert("Login successful!");
+      // Save logged-in user
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data.user)
+      );
 
       navigate("/dashboard");
     } catch (err) {
       if (err.response) {
-        setError(err.response.data.message || "Invalid email or password.");
+        setError(
+          err.response.data.message ||
+          "Invalid email or password."
+        );
       } else {
         setError("Unable to connect to the server.");
       }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -64,7 +80,7 @@ function Login() {
             <div className="card shadow">
               <div className="card-body">
 
-                <h2 className="text-center mb-4">
+                <h2 className="text-center mb-2">
                   University Course Management System
                 </h2>
 
