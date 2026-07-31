@@ -24,7 +24,7 @@ function Login() {
     }
   }, [navigate]);
 
-  // Handle input changes
+  // Handle form input
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,7 +32,7 @@ function Login() {
     });
   };
 
-  // Handle login
+  // Login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,30 +42,58 @@ function Login() {
     try {
       const response = await api.post("/auth/login", formData);
 
-      // Save JWT
+      console.log("Login Response:", response.data);
+
+      // Save JWT token
       localStorage.setItem(
         "token",
         response.data.access_token
       );
 
-      // Save logged-in user
+      // Save user
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
       );
 
+      alert("Login successful!");
+
       navigate("/dashboard");
+
     } catch (err) {
+
+      console.error("Login Error:", err);
+
       if (err.response) {
+
+        console.log("Status:", err.response.status);
+        console.log("Response:", err.response.data);
+
         setError(
           err.response.data.message ||
           "Invalid email or password."
         );
+
+      } else if (err.request) {
+
+        console.log("No response received.");
+
+        setError(
+          "Cannot connect to the Flask server."
+        );
+
       } else {
-        setError("Unable to connect to the server.");
+
+        console.log(err.message);
+
+        setError(err.message);
+
       }
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
@@ -73,14 +101,17 @@ function Login() {
     <>
       <Navbar />
 
-      <div className="container mt-5 mb-5">
+      <div className="container mt-5">
+
         <div className="row justify-content-center">
-          <div className="col-md-6">
+
+          <div className="col-md-5">
 
             <div className="card shadow">
+
               <div className="card-body">
 
-                <h2 className="text-center mb-2">
+                <h2 className="text-center mb-3">
                   University Course Management System
                 </h2>
 
@@ -97,39 +128,36 @@ function Login() {
                 <form onSubmit={handleSubmit}>
 
                   <div className="mb-3">
-                    <label className="form-label">
-                      Email Address
-                    </label>
+
+                    <label>Email</label>
 
                     <input
                       type="email"
-                      name="email"
                       className="form-control"
-                      placeholder="Enter your email"
+                      name="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
                     />
+
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">
-                      Password
-                    </label>
+
+                    <label>Password</label>
 
                     <input
                       type="password"
-                      name="password"
                       className="form-control"
-                      placeholder="Enter your password"
+                      name="password"
                       value={formData.password}
                       onChange={handleChange}
                       required
                     />
+
                   </div>
 
                   <button
-                    type="submit"
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
@@ -139,23 +167,31 @@ function Login() {
                 </form>
 
                 <div className="text-center mt-3">
+
                   <Link to="/forgot-password">
                     Forgot Password?
                   </Link>
+
                 </div>
 
                 <div className="text-center mt-2">
+
                   Don't have an account?{" "}
+
                   <Link to="/register">
                     Register
                   </Link>
+
                 </div>
 
               </div>
+
             </div>
 
           </div>
+
         </div>
+
       </div>
 
       <Footer />
