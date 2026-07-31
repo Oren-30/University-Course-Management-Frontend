@@ -1,103 +1,96 @@
-import React from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
+import React, { useEffect, useState } from "react";
+import api from "../services/api";
 
 function Profile() {
 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const [user, setUser] = useState(null);
 
-  return (
-    <>
-      <Navbar />
+  const [loading, setLoading] = useState(true);
 
-      <div className="container-fluid">
-        <div className="row">
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-          <div className="col-md-2 bg-light min-vh-100">
-            <Sidebar />
-          </div>
+  const fetchProfile = async () => {
+    try {
 
-          <div className="col-md-10 p-4">
+      const response = await api.get("/auth/profile");
 
-            <h2 className="mb-4">
-              My Profile
-            </h2>
+      setUser(response.data);
 
-            <div className="card shadow">
+    } catch (error) {
 
-              <div className="card-body">
+      console.error("Error loading profile", error);
 
-                <div className="text-center mb-4">
+    } finally {
 
-                  <img
-                    src="https://via.placeholder.com/150"
-                    alt="Profile"
-                    className="rounded-circle mb-3"
-                  />
+      setLoading(false);
 
-                  <h3>
-                    {user.first_name} {user.last_name}
-                  </h3>
+    }
+  };
 
-                  <p className="text-muted">
-                    {user.role}
-                  </p>
+  if (loading) {
+    return (
+      <div className="container mt-4">
+        <h4>Loading profile...</h4>
+      </div>
+    );
+  }
 
-                </div>
-
-                <hr />
-
-                <div className="row">
-
-                  <div className="col-md-6">
-
-                    <h5>First Name</h5>
-                    <p>{user.first_name}</p>
-
-                    <h5>Email</h5>
-                    <p>{user.email}</p>
-
-                  </div>
-
-
-                  <div className="col-md-6">
-
-                    <h5>Last Name</h5>
-                    <p>{user.last_name}</p>
-
-                    <h5>Role</h5>
-                    <p>{user.role}</p>
-
-                  </div>
-
-                </div>
-
-
-                <div className="mt-4">
-
-                  <button className="btn btn-primary me-2">
-                    Edit Profile
-                  </button>
-
-                  <button className="btn btn-warning">
-                    Change Password
-                  </button>
-
-                </div>
-
-
-              </div>
-
-            </div>
-
-          </div>
-
+  if (!user) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-danger">
+          Unable to load profile.
         </div>
       </div>
+    );
+  }
 
-      <Footer />
-    </>
+  return (
+    <div className="container mt-4">
+
+      <h2>My Profile</h2>
+
+      <div className="card shadow mt-3">
+
+        <div className="card-body">
+
+          <table className="table">
+
+            <tbody>
+
+              <tr>
+                <th>First Name</th>
+                <td>{user.first_name}</td>
+              </tr>
+
+              <tr>
+                <th>Last Name</th>
+                <td>{user.last_name}</td>
+              </tr>
+
+              <tr>
+                <th>Email</th>
+                <td>{user.email}</td>
+              </tr>
+
+              <tr>
+                <th>Role</th>
+                <td className="text-capitalize">
+                  {user.role}
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
   );
 }
 
