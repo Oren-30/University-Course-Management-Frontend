@@ -1,286 +1,126 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
 import api from "../services/api";
 
 function Courses() {
 
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 5;
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
-
   const fetchCourses = async () => {
-
     try {
-
-      const response = await api.get("/courses");
-
-      setCourses(response.data);
-
+      const response = await api.get("/courses/");
+      setCourses(response.data.courses);
     } catch (error) {
-
-      console.log("Error fetching courses:", error);
-
-    } finally {
-
-      setLoading(false);
-
+      console.error("Error loading courses", error);
     }
-
   };
 
-
-  const deleteCourse = async (id) => {
-
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this course?"
-    );
-
-
-    if (!confirmDelete) return;
-
-
-    try {
-
-      await api.delete(`/courses/${id}`);
-
-      setCourses(
-        courses.filter((course) => course.id !== id)
-      );
-
-    } catch (error) {
-
-      console.log("Delete error:", error);
-
-    }
-
-  };
-
-
-  const filteredCourses = courses.filter((course) =>
-    course.course_name
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  // Search courses
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.course_name.toLowerCase().includes(search.toLowerCase()) ||
+      course.course_code.toLowerCase().includes(search.toLowerCase()) ||
+      course.department.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Pagination
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+
+  const currentCourses = filteredCourses.slice(
+    indexOfFirstCourse,
+    indexOfLastCourse
+  );
+
+  const totalPages = Math.ceil(
+    filteredCourses.length / coursesPerPage
+  );
 
   return (
+    <div className="container mt-4">
 
-    <>
+      <h2>Courses</h2>
 
-      <Navbar />
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search course..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
+      <table className="table table-bordered table-striped">
 
-      <div className="container-fluid">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Course Code</th>
+            <th>Course Name</th>
+            <th>Credits</th>
+            <th>Department</th>
+            <th>Semester</th>
+          </tr>
+        </thead>
 
-        <div className="row">
+        <tbody>
 
+          {currentCourses.map((course) => (
 
-          <div className="col-md-2 bg-light min-vh-100">
+            <tr key={course.id}>
 
-            <Sidebar />
+              <td>{course.id}</td>
 
-          </div>
+              <td>{course.course_code}</td>
 
+              <td>{course.course_name}</td>
 
+              <td>{course.credits}</td>
 
-          <div className="col-md-10 p-4">
+              <td>{course.department}</td>
 
+              <td>{course.semester}</td>
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            </tr>
 
+          ))}
 
-              <h2>
-                CMS University Courses
-              </h2>
+        </tbody>
 
+      </table>
 
-              <button className="btn btn-success">
-                Add Course
-              </button>
+      <div className="d-flex gap-2">
 
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Previous
+        </button>
 
-            </div>
+        <span className="align-self-center">
+          Page {currentPage} of {totalPages || 1}
+        </span>
 
-
-
-            <input
-
-              type="text"
-
-              className="form-control mb-3"
-
-              placeholder="Search Course..."
-
-              value={search}
-
-              onChange={(e) => setSearch(e.target.value)}
-
-            />
-
-
-
-            {loading ? (
-
-              <div className="text-center">
-
-                <h4>
-                  Loading Courses...
-                </h4>
-
-              </div>
-
-            ) : (
-
-
-              <div className="table-responsive">
-
-
-                <table className="table table-bordered table-hover">
-
-
-                  <thead className="table-dark">
-
-                    <tr>
-
-                      <th>ID</th>
-
-                      <th>Course Name</th>
-
-                      <th>Department</th>
-
-                      <th>Credits</th>
-
-                      <th>Instructor</th>
-
-                      <th>Actions</th>
-
-                    </tr>
-
-                  </thead>
-
-
-
-                  <tbody>
-
-
-                    {filteredCourses.length > 0 ? (
-
-                      filteredCourses.map((course) => (
-
-                        <tr key={course.id}>
-
-
-                          <td>
-                            {course.id}
-                          </td>
-
-
-                          <td>
-                            {course.course_name}
-                          </td>
-
-
-                          <td>
-                            {course.department}
-                          </td>
-
-
-                          <td>
-                            {course.credits}
-                          </td>
-
-
-                          <td>
-                            {course.instructor_name}
-                          </td>
-
-
-                          <td>
-
-
-                            <button
-                              className="btn btn-warning btn-sm me-2"
-                            >
-                              Edit
-                            </button>
-
-
-
-                            <button
-
-                              className="btn btn-danger btn-sm"
-
-                              onClick={() =>
-                                deleteCourse(course.id)
-                              }
-
-                            >
-                              Delete
-                            </button>
-
-
-                          </td>
-
-
-                        </tr>
-
-                      ))
-
-                    ) : (
-
-
-                      <tr>
-
-                        <td
-                          colSpan="6"
-                          className="text-center"
-                        >
-                          No Courses Found
-                        </td>
-
-                      </tr>
-
-
-                    )}
-
-
-                  </tbody>
-
-
-                </table>
-
-
-              </div>
-
-
-            )}
-
-
-          </div>
-
-
-        </div>
-
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === totalPages || totalPages === 0}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
 
       </div>
 
-
-      <Footer />
-
-
-    </>
-
+    </div>
   );
-
 }
-
 
 export default Courses;
