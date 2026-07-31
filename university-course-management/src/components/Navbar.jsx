@@ -1,50 +1,106 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+function Navbar() {
 
-function Navbar(){
+  const navigate = useNavigate();
 
-const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
 
-const logout = () => {
+  return (
 
- localStorage.removeItem("user");
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
 
- navigate("/login");
+      <div className="container">
 
-};
+        <Link className="navbar-brand" to="/dashboard">
+          University CMS
+        </Link>
 
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-return (
+        <div
+          className="collapse navbar-collapse"
+          id="navbarNav"
+        >
 
-<nav className="navbar navbar-dark bg-primary">
+          <ul className="navbar-nav me-auto">
 
-<div className="container">
+            <li className="nav-item">
+              <Link className="nav-link" to="/dashboard">
+                Dashboard
+              </Link>
+            </li>
 
-<Link 
-className="navbar-brand"
-to="/"
->
-CMS University
-</Link>
+            <li className="nav-item">
+              <Link className="nav-link" to="/students">
+                Students
+              </Link>
+            </li>
 
+            <li className="nav-item">
+              <Link className="nav-link" to="/courses">
+                Courses
+              </Link>
+            </li>
 
-<button
-className="btn btn-light"
-onClick={logout}
->
-Logout
-</button>
+            <li className="nav-item">
+              <Link className="nav-link" to="/instructors">
+                Instructors
+              </Link>
+            </li>
 
+            <li className="nav-item">
+              <Link className="nav-link" to="/enrollments">
+                Enrollments
+              </Link>
+            </li>
 
-</div>
+            <li className="nav-item">
+              <Link className="nav-link" to="/profile">
+                Profile
+              </Link>
+            </li>
 
-</nav>
+          </ul>
 
-);
+          {user && (
+            <div className="d-flex align-items-center">
 
+              <span className="text-white me-3">
+                {user.first_name} ({user.role})
+              </span>
+
+              <button
+                className="btn btn-light btn-sm"
+                onClick={logout}
+              >
+                Logout
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+    </nav>
+
+  );
 }
-
 
 export default Navbar;
