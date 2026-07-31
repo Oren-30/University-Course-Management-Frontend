@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
 import api from "../services/api";
 
-function Enrollment() {
+function Enrollments() {
+
   const [enrollments, setEnrollments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const enrollmentsPerPage = 5;
 
   useEffect(() => {
     fetchEnrollments();
@@ -14,109 +15,125 @@ function Enrollment() {
 
   const fetchEnrollments = async () => {
     try {
-      const response = await api.get("/enrollments");
-      setEnrollments(response.data);
+      const response = await api.get("/enrollments/");
+      setEnrollments(response.data.enrollments);
     } catch (error) {
-      console.error("Error fetching enrollments:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error loading enrollments", error);
     }
   };
 
+  // Search
+  const filteredEnrollments = enrollments.filter(
+    (enrollment) =>
+      enrollment.status.toLowerCase().includes(search.toLowerCase()) ||
+      (enrollment.grade || "")
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      enrollment.student_id.toString().includes(search) ||
+      enrollment.course_id.toString().includes(search)
+  );
+
+  // Pagination
+  const indexOfLastEnrollment =
+    currentPage * enrollmentsPerPage;
+
+  const indexOfFirstEnrollment =
+    indexOfLastEnrollment - enrollmentsPerPage;
+
+  const currentEnrollments = filteredEnrollments.slice(
+    indexOfFirstEnrollment,
+    indexOfLastEnrollment
+  );
+
+  const totalPages = Math.ceil(
+    filteredEnrollments.length / enrollmentsPerPage
+  );
+
   return (
-    <>
-      <Navbar />
+    <div className="container mt-4">
 
-      <div className="container-fluid">
-        <div className="row">
+      <h2>Enrollments</h2>
 
-          <div className="col-md-2 bg-light min-vh-100">
-            <Sidebar />
-          </div>
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search enrollment..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-          <div className="col-md-10 p-4">
+      <table className="table table-bordered table-striped">
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2>Enrollment Management</h2>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student ID</th>
+            <th>Course ID</th>
+            <th>Enrollment Date</th>
+            <th>Status</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
 
-              <button className="btn btn-success">
-                Add Enrollment
-              </button>
-            </div>
+        <tbody>
 
-            <input
-              type="text"
-              className="form-control mb-4"
-              placeholder="Search enrollment..."
-            />
+          {currentEnrollments.map((enrollment) => (
 
-            {loading ? (
-              <div className="text-center">
-                <h5>Loading...</h5>
-              </div>
-            ) : (
-              <div className="table-responsive">
+            <tr key={enrollment.id}>
 
-                <table className="table table-striped table-bordered">
+              <td>{enrollment.id}</td>
 
-                  <thead className="table-dark">
-                    <tr>
-                      <th>ID</th>
-                      <th>Student</th>
-                      <th>Course</th>
-                      <th>Semester</th>
-                      <th>Enrollment Date</th>
-                      <th>Grade</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
+              <td>{enrollment.student_id}</td>
 
-                  <tbody>
+              <td>{enrollment.course_id}</td>
 
-                    {enrollments.length > 0 ? (
-                      enrollments.map((enrollment) => (
-                        <tr key={enrollment.id}>
-                          <td>{enrollment.id}</td>
-                          <td>{enrollment.student_name}</td>
-                          <td>{enrollment.course_name}</td>
-                          <td>{enrollment.semester}</td>
-                          <td>{enrollment.enrollment_date}</td>
-                          <td>{enrollment.grade}</td>
+              <td>{enrollment.enrollment_date}</td>
 
-                          <td>
-                            <button className="btn btn-warning btn-sm me-2">
-                              Edit
-                            </button>
+              <td>{enrollment.status}</td>
 
-                            <button className="btn btn-danger btn-sm">
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="text-center">
-                          No enrollments found.
-                        </td>
-                      </tr>
-                    )}
+              <td>{enrollment.grade || "-"}</td>
 
-                  </tbody>
+            </tr>
 
-                </table>
+          ))}
 
-              </div>
-            )}
+        </tbody>
 
-          </div>
+      </table>
 
-        </div>
+      <div className="d-flex gap-2">
+
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
+          onClick={() =>
+            setCurrentPage(currentPage - 1)
+          }
+        >
+          Previous
+        </button>
+
+        <span className="align-self-center">
+          Page {currentPage} of {totalPages || 1}
+        </span>
+
+        <button
+          className="btn btn-secondary"
+          disabled={
+            currentPage === totalPages ||
+            totalPages === 0
+          }
+          onClick={() =>
+            setCurrentPage(currentPage + 1)
+          }
+        >
+          Next
+        </button>
+
       </div>
 
-      <Footer />
-    </>
+    </div>
   );
 }
 
-export default Enrollment;
+export default Enrollments;
