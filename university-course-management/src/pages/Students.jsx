@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
 import api from "../services/api";
 
 function Students() {
-
   const [students, setStudents] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 5;
 
   useEffect(() => {
     fetchStudents();
@@ -14,125 +14,112 @@ function Students() {
 
   const fetchStudents = async () => {
     try {
-      const response = await api.get("/students");
-      setStudents(response.data);
+      const response = await api.get("/students/");
+      setStudents(response.data.students);
     } catch (error) {
-      console.log(error);
+      console.error("Error loading students", error);
     }
   };
 
+  // Search students
+  const filteredStudents = students.filter(
+    (student) =>
+      student.first_name.toLowerCase().includes(search.toLowerCase()) ||
+      student.last_name.toLowerCase().includes(search.toLowerCase()) ||
+      student.student_number.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Pagination
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+
+  const currentStudents = filteredStudents.slice(
+    indexOfFirstStudent,
+    indexOfLastStudent
+  );
+
+  const totalPages = Math.ceil(
+    filteredStudents.length / studentsPerPage
+  );
+
   return (
-    <>
-      <Navbar />
+    <div className="container mt-4">
 
-      <div className="container-fluid">
-        <div className="row">
+      <h2>Students</h2>
 
-          <div className="col-md-2 bg-light min-vh-100">
-            <Sidebar />
-          </div>
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search student..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-          <div className="col-md-10 p-4">
+      {/* Student Table */}
+      <table className="table table-bordered table-striped">
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Student No.</th>
+            <th>Email</th>
+            <th>Department</th>
+          </tr>
+        </thead>
 
-              <h2>Students</h2>
+        <tbody>
 
-              <button className="btn btn-primary">
-                Add Student
-              </button>
+          {currentStudents.map((student) => (
 
-            </div>
+            <tr key={student.id}>
 
-            <div className="mb-3">
+              <td>{student.id}</td>
 
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search Student..."
-              />
+              <td>
+                {student.first_name} {student.last_name}
+              </td>
 
-            </div>
+              <td>{student.student_number}</td>
 
-            <div className="table-responsive">
+              <td>{student.email}</td>
 
-              <table className="table table-bordered table-hover">
+              <td>{student.department}</td>
 
-                <thead className="table-dark">
+            </tr>
 
-                  <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Actions</th>
-                  </tr>
+          ))}
 
-                </thead>
+        </tbody>
 
-                <tbody>
+      </table>
 
-                  {students.length > 0 ? (
+      {/* Pagination */}
+      <div className="d-flex gap-2">
 
-                    students.map((student) => (
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Previous
+        </button>
 
-                      <tr key={student.id}>
+        <span className="align-self-center">
+          Page {currentPage} of {totalPages || 1}
+        </span>
 
-                        <td>{student.id}</td>
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === totalPages || totalPages === 0}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
 
-                        <td>{student.first_name}</td>
-
-                        <td>{student.last_name}</td>
-
-                        <td>{student.email}</td>
-
-                        <td>{student.phone}</td>
-
-                        <td>
-
-                          <button className="btn btn-warning btn-sm me-2">
-                            Edit
-                          </button>
-
-                          <button className="btn btn-danger btn-sm">
-                            Delete
-                          </button>
-
-                        </td>
-
-                      </tr>
-
-                    ))
-
-                  ) : (
-
-                    <tr>
-
-                      <td
-                        colSpan="6"
-                        className="text-center"
-                      >
-                        No Students Found
-                      </td>
-
-                    </tr>
-
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </div>
-
-        </div>
       </div>
 
-      <Footer />
-    </>
+    </div>
   );
 }
 
