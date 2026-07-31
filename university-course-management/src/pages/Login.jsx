@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../services/api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -12,16 +12,8 @@ function Login() {
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -33,18 +25,16 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
     setError("");
+    setLoading(true);
 
     try {
-      // Correct backend endpoint
-      const response = await api.post("/login", formData);
+      const response = await api.post("/login", {
+        email: formData.email,
+        password: formData.password,
+      });
 
-      localStorage.setItem(
-        "token",
-        response.data.access_token
-      );
-
+      localStorage.setItem("token", response.data.access_token);
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
@@ -53,41 +43,30 @@ function Login() {
       navigate("/dashboard");
 
     } catch (err) {
-
       if (err.response) {
-        setError(
-          err.response.data.message ||
-          "Invalid email or password."
-        );
+        setError(err.response.data.message || "Invalid email or password.");
       } else {
-        setError("Cannot connect to the Flask server.");
+        setError("Unable to connect to the server.");
       }
-
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
     <>
       <Navbar />
 
-      <div className="container mt-5 mb-5">
+      <div className="container mt-5">
         <div className="row justify-content-center">
-
-          <div className="col-md-5">
+          <div className="col-md-6">
 
             <div className="card shadow">
-
               <div className="card-body">
 
-                <h2 className="text-center mb-2">
-                  University Course Management System
-                </h2>
-
-                <h4 className="text-center mb-4">
+                <h2 className="text-center mb-4">
                   Login
-                </h4>
+                </h2>
 
                 {error && (
                   <div className="alert alert-danger">
@@ -98,15 +77,11 @@ function Login() {
                 <form onSubmit={handleSubmit}>
 
                   <div className="mb-3">
-                    <label className="form-label">
-                      Email Address
-                    </label>
-
+                    <label>Email</label>
                     <input
                       type="email"
                       name="email"
                       className="form-control"
-                      placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -114,15 +89,11 @@ function Login() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">
-                      Password
-                    </label>
-
+                    <label>Password</label>
                     <input
                       type="password"
                       name="password"
                       className="form-control"
-                      placeholder="Enter your password"
                       value={formData.password}
                       onChange={handleChange}
                       required
@@ -134,18 +105,12 @@ function Login() {
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? "Signing in..." : "Login"}
                   </button>
 
                 </form>
 
                 <div className="text-center mt-3">
-                  <Link to="/forgot-password">
-                    Forgot Password?
-                  </Link>
-                </div>
-
-                <div className="text-center mt-2">
                   Don't have an account?{" "}
                   <Link to="/register">
                     Register
@@ -153,11 +118,9 @@ function Login() {
                 </div>
 
               </div>
-
             </div>
 
           </div>
-
         </div>
       </div>
 
