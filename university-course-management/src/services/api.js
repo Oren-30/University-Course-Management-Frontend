@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:5000/api",
+  baseURL: "https://YOUR_RENDER_BACKEND_URL.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,7 +28,6 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-
       window.location.href = "/login";
     }
 
