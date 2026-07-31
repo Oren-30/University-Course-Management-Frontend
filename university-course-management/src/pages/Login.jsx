@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import api from "../services/api";
 
 function Login() {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -23,18 +24,24 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     setError("");
     setLoading(true);
 
     try {
-      const response = await api.post("/login", {
+
+      const response = await api.post("/auth/login", {
         email: formData.email,
         password: formData.password,
       });
 
-      localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem(
+        "token",
+        response.data.access_token
+      );
+
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
@@ -43,14 +50,19 @@ function Login() {
       navigate("/dashboard");
 
     } catch (err) {
+
+      console.error(err);
+
       if (err.response) {
-        setError(err.response.data.message || "Invalid email or password.");
+        setError(err.response.data.message);
       } else {
         setError("Unable to connect to the server.");
       }
+
     }
 
     setLoading(false);
+
   };
 
   return (
@@ -58,10 +70,13 @@ function Login() {
       <Navbar />
 
       <div className="container mt-5">
+
         <div className="row justify-content-center">
+
           <div className="col-md-6">
 
             <div className="card shadow">
+
               <div className="card-body">
 
                 <h2 className="text-center mb-4">
@@ -78,6 +93,7 @@ function Login() {
 
                   <div className="mb-3">
                     <label>Email</label>
+
                     <input
                       type="email"
                       name="email"
@@ -90,6 +106,7 @@ function Login() {
 
                   <div className="mb-3">
                     <label>Password</label>
+
                     <input
                       type="password"
                       name="password"
@@ -105,28 +122,36 @@ function Login() {
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
-                    {loading ? "Signing in..." : "Login"}
+                    {loading ? "Signing In..." : "Login"}
                   </button>
 
                 </form>
 
                 <div className="text-center mt-3">
+
                   Don't have an account?{" "}
+
                   <Link to="/register">
                     Register
                   </Link>
+
                 </div>
 
               </div>
+
             </div>
 
           </div>
+
         </div>
+
       </div>
 
       <Footer />
+
     </>
   );
+
 }
 
 export default Login;
