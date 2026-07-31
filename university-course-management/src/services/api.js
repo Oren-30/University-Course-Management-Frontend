@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://YOUR_RENDER_BACKEND_URL.onrender.com/api",
+  baseURL: "https://university-course-management-backend.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -15,7 +15,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -30,7 +29,6 @@ api.interceptors.response.use(
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
-
     return Promise.reject(error);
   }
 );
