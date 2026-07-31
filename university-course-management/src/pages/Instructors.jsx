@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
 import api from "../services/api";
 
 function Instructors() {
 
   const [instructors, setInstructors] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const instructorsPerPage = 5;
 
   useEffect(() => {
     fetchInstructors();
@@ -14,114 +15,116 @@ function Instructors() {
 
   const fetchInstructors = async () => {
     try {
-      const response = await api.get("/instructors");
-      setInstructors(response.data);
+      const response = await api.get("/instructors/");
+      setInstructors(response.data.instructors);
     } catch (error) {
-      console.log(error);
+      console.error("Error loading instructors", error);
     }
   };
 
+  // Search
+  const filteredInstructors = instructors.filter(
+    (instructor) =>
+      instructor.first_name.toLowerCase().includes(search.toLowerCase()) ||
+      instructor.last_name.toLowerCase().includes(search.toLowerCase()) ||
+      instructor.email.toLowerCase().includes(search.toLowerCase()) ||
+      instructor.department.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Pagination
+  const indexOfLastInstructor = currentPage * instructorsPerPage;
+  const indexOfFirstInstructor = indexOfLastInstructor - instructorsPerPage;
+
+  const currentInstructors = filteredInstructors.slice(
+    indexOfFirstInstructor,
+    indexOfLastInstructor
+  );
+
+  const totalPages = Math.ceil(
+    filteredInstructors.length / instructorsPerPage
+  );
+
   return (
-    <>
-      <Navbar />
+    <div className="container mt-4">
 
-      <div className="container-fluid">
-        <div className="row">
+      <h2>Instructors</h2>
 
-          <div className="col-md-2 bg-light min-vh-100">
-            <Sidebar />
-          </div>
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search instructor..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-          <div className="col-md-10 p-4">
+      <table className="table table-bordered table-striped">
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Office</th>
+          </tr>
+        </thead>
 
-              <h2>Instructors</h2>
+        <tbody>
 
-              <button className="btn btn-primary">
-                Add Instructor
-              </button>
+          {currentInstructors.map((instructor) => (
 
-            </div>
+            <tr key={instructor.id}>
 
-            <input
-              type="text"
-              className="form-control mb-3"
-              placeholder="Search Instructor..."
-            />
+              <td>{instructor.id}</td>
 
-            <div className="table-responsive">
+              <td>
+                {instructor.first_name} {instructor.last_name}
+              </td>
 
-              <table className="table table-bordered table-hover">
+              <td>{instructor.email}</td>
 
-                <thead className="table-dark">
+              <td>{instructor.phone || "-"}</td>
 
-                  <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Office</th>
-                    <th>Actions</th>
-                  </tr>
+              <td>{instructor.department}</td>
 
-                </thead>
+              <td>{instructor.office || "-"}</td>
 
-                <tbody>
+            </tr>
 
-                  {instructors.length > 0 ? (
+          ))}
 
-                    instructors.map((instructor) => (
+        </tbody>
 
-                      <tr key={instructor.id}>
+      </table>
 
-                        <td>{instructor.id}</td>
-                        <td>{instructor.first_name}</td>
-                        <td>{instructor.last_name}</td>
-                        <td>{instructor.email}</td>
-                        <td>{instructor.office}</td>
+      <div className="d-flex gap-2">
 
-                        <td>
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Previous
+        </button>
 
-                          <button className="btn btn-warning btn-sm me-2">
-                            Edit
-                          </button>
+        <span className="align-self-center">
+          Page {currentPage} of {totalPages || 1}
+        </span>
 
-                          <button className="btn btn-danger btn-sm">
-                            Delete
-                          </button>
+        <button
+          className="btn btn-secondary"
+          disabled={
+            currentPage === totalPages || totalPages === 0
+          }
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
 
-                        </td>
-
-                      </tr>
-
-                    ))
-
-                  ) : (
-
-                    <tr>
-
-                      <td colSpan="6" className="text-center">
-                        No Instructors Found
-                      </td>
-
-                    </tr>
-
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </div>
-
-        </div>
       </div>
 
-      <Footer />
-    </>
+    </div>
   );
 }
 
