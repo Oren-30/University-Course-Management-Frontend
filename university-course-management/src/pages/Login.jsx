@@ -15,7 +15,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect if already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -24,7 +23,6 @@ function Login() {
     }
   }, [navigate]);
 
-  // Handle form input
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,7 +30,6 @@ function Login() {
     });
   };
 
-  // Login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,60 +37,34 @@ function Login() {
     setError("");
 
     try {
-      const response = await api.post("/auth/login", formData);
+      // Correct backend endpoint
+      const response = await api.post("/login", formData);
 
-      console.log("Login Response:", response.data);
-
-      // Save JWT token
       localStorage.setItem(
         "token",
         response.data.access_token
       );
 
-      // Save user
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
       );
 
-      alert("Login successful!");
-
       navigate("/dashboard");
 
     } catch (err) {
 
-      console.error("Login Error:", err);
-
       if (err.response) {
-
-        console.log("Status:", err.response.status);
-        console.log("Response:", err.response.data);
-
         setError(
           err.response.data.message ||
           "Invalid email or password."
         );
-
-      } else if (err.request) {
-
-        console.log("No response received.");
-
-        setError(
-          "Cannot connect to the Flask server."
-        );
-
       } else {
-
-        console.log(err.message);
-
-        setError(err.message);
-
+        setError("Cannot connect to the Flask server.");
       }
 
     } finally {
-
       setLoading(false);
-
     }
   };
 
@@ -101,8 +72,7 @@ function Login() {
     <>
       <Navbar />
 
-      <div className="container mt-5">
-
+      <div className="container mt-5 mb-5">
         <div className="row justify-content-center">
 
           <div className="col-md-5">
@@ -111,7 +81,7 @@ function Login() {
 
               <div className="card-body">
 
-                <h2 className="text-center mb-3">
+                <h2 className="text-center mb-2">
                   University Course Management System
                 </h2>
 
@@ -128,36 +98,39 @@ function Login() {
                 <form onSubmit={handleSubmit}>
 
                   <div className="mb-3">
-
-                    <label>Email</label>
+                    <label className="form-label">
+                      Email Address
+                    </label>
 
                     <input
                       type="email"
-                      className="form-control"
                       name="email"
+                      className="form-control"
+                      placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleChange}
                       required
                     />
-
                   </div>
 
                   <div className="mb-3">
-
-                    <label>Password</label>
+                    <label className="form-label">
+                      Password
+                    </label>
 
                     <input
                       type="password"
-                      className="form-control"
                       name="password"
+                      className="form-control"
+                      placeholder="Enter your password"
                       value={formData.password}
                       onChange={handleChange}
                       required
                     />
-
                   </div>
 
                   <button
+                    type="submit"
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
@@ -167,21 +140,16 @@ function Login() {
                 </form>
 
                 <div className="text-center mt-3">
-
                   <Link to="/forgot-password">
                     Forgot Password?
                   </Link>
-
                 </div>
 
                 <div className="text-center mt-2">
-
                   Don't have an account?{" "}
-
                   <Link to="/register">
                     Register
                   </Link>
-
                 </div>
 
               </div>
@@ -191,7 +159,6 @@ function Login() {
           </div>
 
         </div>
-
       </div>
 
       <Footer />
