@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../services/api";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import StudentCard from "../components/StudentCard";
 
 function Students() {
   const [students, setStudents] = useState([]);
-  const [search, setSearch] = useState("");
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 5;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchStudents();
@@ -14,112 +15,71 @@ function Students() {
 
   const fetchStudents = async () => {
     try {
-      const response = await api.get("/students/");
-      setStudents(response.data.students);
-    } catch (error) {
-      console.error("Error loading students", error);
+      const response = await api.get("/students");
+      setStudents(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load students.");
+      setLoading(false);
     }
   };
 
-  // Search students
-  const filteredStudents = students.filter(
-    (student) =>
-      student.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      student.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      student.student_number.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this student?"
+    );
 
-  // Pagination
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+    if (!confirmDelete) return;
 
-  const currentStudents = filteredStudents.slice(
-    indexOfFirstStudent,
-    indexOfLastStudent
-  );
+    try {
+      await api.delete(`/students/${id}`);
 
-  const totalPages = Math.ceil(
-    filteredStudents.length / studentsPerPage
-  );
+      setStudents(
+        students.filter((student) => student.id !== id)
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete student.");
+    }
+  };
 
   return (
-    <div className="container mt-4">
+    <>
+      <Navbar />
 
-      <h2>Students</h2>
+      <div className="container mt-5">
+        <h1 className="mb-4">Students</h1>
 
-      <input
-        type="text"
-        className="form-control mb-3"
-        placeholder="Search student..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+        {loading && <p>Loading students...</p>}
 
-      {/* Student Table */}
-      <table className="table table-bordered table-striped">
+        {error && (
+          <div className="alert alert-danger">
+            {error}
+          </div>
+        )}
 
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Student No.</th>
-            <th>Email</th>
-            <th>Department</th>
-          </tr>
-        </thead>
+        {!loading && students.length === 0 && (
+          <p>No students found.</p>
+        )}
 
-        <tbody>
-
-          {currentStudents.map((student) => (
-
-            <tr key={student.id}>
-
-              <td>{student.id}</td>
-
-              <td>
-                {student.first_name} {student.last_name}
-              </td>
-
-              <td>{student.student_number}</td>
-
-              <td>{student.email}</td>
-
-              <td>{student.department}</td>
-
-            </tr>
-
+        <div className="row">
+          {students.map((student) => (
+            <div
+              className="col-md-4 mb-4"
+              key={student.id}
+            >
+              <StudentCard
+                student={student}
+                onDelete={handleDelete}
+              />
+            </div>
           ))}
-
-        </tbody>
-
-      </table>
-
-      {/* Pagination */}
-      <div className="d-flex gap-2">
-
-        <button
-          className="btn btn-secondary"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          Previous
-        </button>
-
-        <span className="align-self-center">
-          Page {currentPage} of {totalPages || 1}
-        </span>
-
-        <button
-          className="btn btn-secondary"
-          disabled={currentPage === totalPages || totalPages === 0}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          Next
-        </button>
-
+        </div>
       </div>
 
-    </div>
+      <Footer />
+    </>
   );
 }
 

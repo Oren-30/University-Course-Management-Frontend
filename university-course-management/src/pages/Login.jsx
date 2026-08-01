@@ -16,12 +16,14 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+
 
   const handleSubmit = async (e) => {
 
@@ -32,38 +34,53 @@ function Login() {
 
     try {
 
-      const response = await api.post("/auth/login", {
+      const response = await api.post("/login", {
         email: formData.email,
         password: formData.password,
       });
+
 
       localStorage.setItem(
         "token",
         response.data.access_token
       );
 
+
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
       );
 
+
       navigate("/dashboard");
+
 
     } catch (err) {
 
       console.error(err);
 
       if (err.response) {
-        setError(err.response.data.message);
+
+        setError(
+          err.response.data.message ||
+          "Invalid email or password."
+        );
+
       } else {
-        setError("Unable to connect to the server.");
+
+        setError(
+          "Unable to connect to the server."
+        );
+
       }
 
     }
 
+
     setLoading(false);
 
   };
+
 
   return (
     <>
@@ -83,15 +100,19 @@ function Login() {
                   Login
                 </h2>
 
+
                 {error && (
                   <div className="alert alert-danger">
                     {error}
                   </div>
                 )}
 
+
                 <form onSubmit={handleSubmit}>
 
+
                   <div className="mb-3">
+
                     <label>Email</label>
 
                     <input
@@ -102,9 +123,12 @@ function Login() {
                       onChange={handleChange}
                       required
                     />
+
                   </div>
 
+
                   <div className="mb-3">
+
                     <label>Password</label>
 
                     <input
@@ -115,17 +139,23 @@ function Login() {
                       onChange={handleChange}
                       required
                     />
+
                   </div>
+
 
                   <button
                     type="submit"
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
+
                     {loading ? "Signing In..." : "Login"}
+
                   </button>
 
+
                 </form>
+
 
                 <div className="text-center mt-3">
 
@@ -137,6 +167,7 @@ function Login() {
 
                 </div>
 
+
               </div>
 
             </div>
@@ -147,11 +178,13 @@ function Login() {
 
       </div>
 
+
       <Footer />
 
     </>
   );
 
 }
+
 
 export default Login;

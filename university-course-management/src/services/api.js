@@ -1,13 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://university-course-management-backend.onrender.com/api",
+  baseURL: "http://127.0.0.1:5000/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Automatically attach JWT token
+// Attach JWT token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -15,20 +15,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => Promise.reject(error)
-);
-
-// Handle unauthorized responses
-api.interceptors.response.use(
-  (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
     return Promise.reject(error);
   }
 );
